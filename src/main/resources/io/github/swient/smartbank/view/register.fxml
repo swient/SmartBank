@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="io.github.swient.smartbank.controller.RegisterController"
+      prefWidth="400" prefHeight="320">
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+    <Label text="SmartBank 開戶"/>
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="姓名"/>
+        <TextField fx:id="fullNameField"/>
+    </HBox>
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="帳號"/>
+        <TextField fx:id="userNameField"/>
+    </HBox>
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="密碼"/>
+        <PasswordField fx:id="passwordField"/>
+    </HBox>
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="選擇銀行"/>
+        <ComboBox fx:id="bankCombo"/>
+    </HBox>
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="確認開戶" onAction="#onRegisterClick"/>
+        <Button text="返回登入" onAction="#onLoginClick"/>
+    </HBox>
+    <Label fx:id="registerMsg" textFill="red"/>
+</VBox>

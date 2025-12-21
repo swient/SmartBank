@@ -1,0 +1,78 @@
+package io.github.swient.smartbank.controller;
+
+import java.io.IOException;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.fxml.FXMLLoader;
+
+import io.github.swient.smartbank.model.account.User;
+import io.github.swient.smartbank.model.bank.Bank;
+import io.github.swient.smartbank.model.card.BankCard;
+import io.github.swient.smartbank.service.UserService;
+import io.github.swient.smartbank.model.account.Account;
+import io.github.swient.smartbank.service.BankService;
+
+public class RegisterController {
+    private static final UserService userService = UserService.getInstance();
+    private static final BankService bankService = BankService.getInstance();
+
+    @FXML
+    private TextField fullNameField;
+    @FXML
+    private TextField userNameField;
+    @FXML
+    private PasswordField passwordField;
+    @FXML
+    private ComboBox<String> bankCombo;
+    @FXML
+    private Label registerMsg;
+
+    @FXML
+    public void initialize() {
+        bankCombo.getItems().clear();
+        bankCombo.getItems().addAll(bankService.getBankMap().keySet());
+    }
+
+    @FXML
+    protected void onRegisterClick() {
+        String fullName = fullNameField.getText();
+        String userName = userNameField.getText();
+        String password = passwordField.getText();
+        String bankName = bankCombo.getValue();
+        if (fullName.isEmpty() || userName.isEmpty() || password.isEmpty() || bankName == null) {
+            registerMsg.setText("請輸入帳號、姓名、密碼並選擇銀行");
+            return;
+        }
+        Bank bank = bankService.getBank(bankName);
+        boolean success = userService.registerUser(bankName, fullName, userName, password);
+        if (!success) {
+            registerMsg.setText("該銀行已存在相同帳號");
+            return;
+        }
+        User user = userService.getUser(bankName, userName);
+        BankCard bankCard = bank.openAccount(user);
+        Account account = bankCard.getAccount();
+        if (account == null) {
+            registerMsg.setText("開戶失敗，請聯絡客服");
+            registerMsg.setTextFill(javafx.scene.paint.Color.RED);
+            return;
+        }
+        registerMsg.setText("開戶成功！\n帳戶：" + account.getAccountNumber() + "\n卡號：" + bankCard.getCardNumber());
+        registerMsg.setTextFill(javafx.scene.paint.Color.GREEN);
+    }
+
+    @FXML
+    protected void onLoginClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/io/github/swient/smartbank/view/login.fxml"));
+            Scene scene = new Scene(loader.load());
+            Stage stage = (Stage) fullNameField.getScene().getWindow();
+            stage.setScene(scene);
+        } catch (IOException e) {
+            registerMsg.setText("返回登入頁面失敗");
+        }
+    }
+}
