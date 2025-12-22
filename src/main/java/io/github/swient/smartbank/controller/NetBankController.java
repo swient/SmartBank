@@ -67,10 +67,10 @@ public class NetBankController {
     }
 
     private void updateAccountCombo() {
-        String userName = loginUser;
         String bankName = loginBank;
+        String userName = loginUser;
         accountCombo.getItems().clear();
-        if (userName != null && bankName != null) {
+        if (bankName != null && userName != null) {
             User user = userService.getUser(bankName, userName);
             if (user != null) {
                 for (Account account : user.getAccounts().values()) {
@@ -103,29 +103,48 @@ public class NetBankController {
         updateAccountCombo();
     }
 
-    @FXML
-    protected void onDepositClick() {
-        String userName = loginUser;
-        String bankName = loginBank;
-        String accountNumber = accountCombo.getValue();
-        String amountStr = amountField.getText();
-        if (userName == null || bankName == null || accountNumber == null || amountStr.isEmpty()) {
-            outputArea.appendText("請選擇使用者、銀行、帳戶並輸入金額\n");
-            return;
+    // 解析金額
+    private Double parseAmount(String amountStr) {
+        if (amountStr == null || amountStr.isEmpty()) {
+            outputArea.appendText("請輸入金額\n");
+            return null;
         }
-        double amount;
         try {
-            amount = Double.parseDouble(amountStr);
+            return Double.parseDouble(amountStr);
         } catch (NumberFormatException e) {
             outputArea.appendText("金額格式錯誤\n");
-            return;
+            return null;
+        }
+    }
+
+    // 取得帳戶
+    private Account getAccount(String accountNumber) {
+        String bankName = loginBank;
+        String userName = loginUser;
+        if (bankName == null || userName == null || accountNumber == null) {
+            outputArea.appendText("請先登入並選擇來源帳戶\n");
+            return null;
         }
         User user = userService.getUser(bankName, userName);
+        if (user == null) {
+            outputArea.appendText("查無來源使用者資料\n");
+            return null;
+        }
         Account account = user.getAccount(accountNumber);
         if (account == null || !account.getAccountNumber().equals(accountNumber)) {
-            outputArea.appendText("查無帳戶資料\n");
-            return;
+            outputArea.appendText("查無來源帳戶資料或資料錯誤\n");
+            return null;
         }
+        return account;
+    }
+
+    @FXML
+    protected void onDepositClick() {
+        String accountNumber = accountCombo.getValue();
+        Double amount = parseAmount(amountField.getText());
+        if (amount == null) return;
+        Account account = getAccount(accountNumber);
+        if (account == null) return;
         ATM atm = new ATM(account);
         boolean result = atm.deposit(amount);
         if (result) {
@@ -137,27 +156,11 @@ public class NetBankController {
 
     @FXML
     protected void onWithdrawClick() {
-        String userName = loginUser;
-        String bankName = loginBank;
         String accountNumber = accountCombo.getValue();
-        String amountStr = amountField.getText();
-        if (userName == null || bankName == null || accountNumber == null || amountStr.isEmpty()) {
-            outputArea.appendText("請選擇使用者、銀行、帳戶並輸入金額\n");
-            return;
-        }
-        double amount;
-        try {
-            amount = Double.parseDouble(amountStr);
-        } catch (NumberFormatException e) {
-            outputArea.appendText("金額格式錯誤\n");
-            return;
-        }
-        User user = userService.getUser(bankName, userName);
-        Account account = user.getAccount(accountNumber);
-        if (account == null || !account.getAccountNumber().equals(accountNumber)) {
-            outputArea.appendText("查無帳戶資料\n");
-            return;
-        }
+        Double amount = parseAmount(amountField.getText());
+        if (amount == null) return;
+        Account account = getAccount(accountNumber);
+        if (account == null) return;
         ATM atm = new ATM(account);
         boolean result = atm.withdraw(amount);
         if (result) {
@@ -169,51 +172,25 @@ public class NetBankController {
 
     @FXML
     private void onBalanceClick() {
-        String userName = loginUser;
-        String bankName = loginBank;
         String accountNumber = accountCombo.getValue();
-        if (userName == null || bankName == null || accountNumber == null) {
-            outputArea.appendText("請選擇使用者、銀行、帳戶\n");
-            return;
-        }
-        User user = userService.getUser(bankName, userName);
-        Account account = user.getAccount(accountNumber);
-        if (account == null || !account.getAccountNumber().equals(accountNumber)) {
-            outputArea.appendText("查無帳戶資料\n");
-            return;
-        }
+        Account account = getAccount(accountNumber);
+        if (account == null) return;
         ATM atm = new ATM(account);
         outputArea.appendText("帳戶餘額：" + atm.getBalance() + "\n");
     }
 
     @FXML
     protected void onTransferClick() {
-        String fromUserName = loginUser;
-        String fromBankName = loginBank;
         String fromAccountNumber = accountCombo.getValue();
         String toUserName = toUserCombo.getValue();
         String toBankName = toBankCombo.getValue();
         String toAccountNumber = toAccountCombo.getValue();
-        String amountStr = amountField.getText();
-        if (fromUserName == null || fromBankName == null || fromAccountNumber == null) {
-            outputArea.appendText("請先登入並選擇來源帳戶");
-            return;
-        }
-        if (toUserName == null || toBankName == null || toAccountNumber == null || amountStr.isEmpty()) {
-            outputArea.appendText("請選目標使用者、銀行、帳戶並輸入金額\n");
-            return;
-        }
-        double amount;
-        try {
-            amount = Double.parseDouble(amountStr);
-        } catch (NumberFormatException e) {
-            outputArea.appendText("金額格式錯誤\n");
-            return;
-        }
-        User fromUser = userService.getUser(fromBankName, fromUserName);
-        Account fromAccount = fromUser.getAccount(fromAccountNumber);
-        if (fromAccount == null || !fromAccount.getAccountNumber().equals(fromAccountNumber)) {
-            outputArea.appendText("查無來源帳戶資料或資料錯誤\n");
+        Double amount = parseAmount(amountField.getText());
+        if (amount == null) return;
+        Account fromAccount = getAccount(fromAccountNumber);
+        if (fromAccount == null) return;
+        if (toUserName == null || toBankName == null || toAccountNumber == null) {
+            outputArea.appendText("請選擇目標使用者、銀行、帳戶\n");
             return;
         }
         User toUser = userService.getUser(toBankName, toUserName);
@@ -237,26 +214,21 @@ public class NetBankController {
 
     @FXML
     private void onAddAccountClick() {
-        String userName = loginUser;
         String bankName = loginBank;
-        if (userName == null || bankName == null) {
+        String userName = loginUser;
+        if (bankName == null || userName == null) {
             outputArea.appendText("請先登入\n");
             return;
         }
-        User user = userService.getUser(bankName, userName);
-        Bank bank = bankService.getBank(bankName);
-        if (user == null || bank == null) {
-            outputArea.appendText("查無使用者或銀行資料\n");
-            return;
-        }
+
         Dialog<String> pinCodeDialog = new Dialog<>();
         pinCodeDialog.setTitle("設定 PIN 碼");
         pinCodeDialog.setHeaderText("為您的新帳戶設定 6 位數 PIN 碼");
         PasswordField pinField = new PasswordField();
         pinField.setPromptText("請輸入數字 PIN 碼");
 
-        // 限制只能輸入數字且長度為 6
-        pinField.textProperty().addListener((obs, oldVal, newVal) -> {
+        // 限制只能輸入數字且長度不超過 6
+        pinField.textProperty().addListener((_, oldVal, newVal) -> {
             if (!newVal.matches("\\d*")) {
                 pinField.setText(newVal.replaceAll("\\D", ""));
             }

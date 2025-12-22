@@ -26,7 +26,7 @@ public class AdminController {
 
     private String bankName;
 
-    public void setLoginUser(String bankName) {
+    public void setLoginBank(String bankName) {
         this.bankName = bankName;
         bankLabel.setText(bankName);
         loadUserTree();

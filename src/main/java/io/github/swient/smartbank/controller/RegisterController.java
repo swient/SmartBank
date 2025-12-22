@@ -44,15 +44,18 @@ public class RegisterController {
         String bankName = bankCombo.getValue();
         if (fullName.isEmpty() || userName.isEmpty() || password.isEmpty() || pinCode.isEmpty() || bankName == null) {
             registerMsg.setText("請輸入帳號、姓名、密碼、PIN 碼並選擇銀行");
+            registerMsg.setTextFill(javafx.scene.paint.Color.RED);
             return;
         }
         if (!pinCode.matches("\\d{6}")) {
             registerMsg.setText("PIN 碼必須為 6 位數字");
+            registerMsg.setTextFill(javafx.scene.paint.Color.RED);
             return;
         }
         BankCard bankCard = userService.registerUser(bankName, fullName, userName, password, pinCode);
         if (bankCard == null) {
             registerMsg.setText("該銀行已存在相同帳號");
+            registerMsg.setTextFill(javafx.scene.paint.Color.RED);
             return;
         }
         registerMsg.setText("開戶成功！\n帳戶：" + bankCard.getAccount().getAccountNumber() + "\n卡號：" + bankCard.getCardNumber());
@@ -68,6 +71,7 @@ public class RegisterController {
             stage.setScene(scene);
         } catch (IOException e) {
             registerMsg.setText("返回登入頁面失敗");
+            registerMsg.setTextFill(javafx.scene.paint.Color.RED);
         }
     }
 }

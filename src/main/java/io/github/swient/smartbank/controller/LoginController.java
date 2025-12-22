@@ -74,7 +74,7 @@ public class LoginController {
                 Scene scene = new Scene(loader.load());
                 // 傳遞登入資訊給管理員頁控制器
                 AdminController adminController = loader.getController();
-                adminController.setLoginUser(bankName);
+                adminController.setLoginBank(bankName);
                 Stage stage = (Stage) userNameField.getScene().getWindow();
                 stage.setScene(scene);
             } catch (IOException e) {

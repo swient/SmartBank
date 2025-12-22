@@ -91,29 +91,52 @@ public class ATMController {
         updateToAccountCombo();
     }
 
-    @FXML
-    protected void onDepositClick() {
-        String cardNumber = loginCard;
-        String bankName = loginBank;
-        String amountStr = amountField.getText();
-        if (cardNumber == null || bankName == null || amountStr.isEmpty()) {
-            outputArea.appendText("請選擇卡號、銀行並輸入金額\n");
-            return;
+    // 解析金額
+    private Double parseAmount(String amountStr) {
+        if (amountStr == null || amountStr.isEmpty()) {
+            outputArea.appendText("請輸入金額\n");
+            return null;
         }
-        double amount;
         try {
-            amount = Double.parseDouble(amountStr);
+            return Double.parseDouble(amountStr);
         } catch (NumberFormatException e) {
             outputArea.appendText("金額格式錯誤\n");
-            return;
+            return null;
+        }
+    }
+
+    // 取得帳戶
+    private Account getAccount() {
+        String bankName = loginBank;
+        String cardNumber = loginCard;
+        if (bankName == null || cardNumber == null) {
+            outputArea.appendText("請先登入\n");
+            return null;
         }
         Bank bank = bankService.getBank(bankName);
+        if (bank == null) {
+            outputArea.appendText("查無來源銀行資料\n");
+            return null;
+        }
         BankCard bankCard = bank.getIssuedBankCards().get(cardNumber);
+        if (bankCard == null || !bankCard.getCardNumber().equals(cardNumber)) {
+            outputArea.appendText("查無來源卡號資料或資料錯誤\n");
+            return null;
+        }
         Account account = bankCard.getAccount();
         if (account == null) {
-            outputArea.appendText("查無帳戶資料\n");
-            return;
+            outputArea.appendText("查無來源帳戶資料\n");
+            return null;
         }
+        return account;
+    }
+
+    @FXML
+    protected void onDepositClick() {
+        Double amount = parseAmount(amountField.getText());
+        if (amount == null) return;
+        Account account = getAccount();
+        if (account == null) return;
         ATM atm = new ATM(account);
         boolean result = atm.deposit(amount);
         if (result) {
@@ -125,27 +148,10 @@ public class ATMController {
 
     @FXML
     protected void onWithdrawClick() {
-        String cardNumber = loginCard;
-        String bankName = loginBank;
-        String amountStr = amountField.getText();
-        if (cardNumber == null || bankName == null || amountStr.isEmpty()) {
-            outputArea.appendText("請選擇卡號、銀行並輸入金額\n");
-            return;
-        }
-        double amount;
-        try {
-            amount = Double.parseDouble(amountStr);
-        } catch (NumberFormatException e) {
-            outputArea.appendText("金額格式錯誤\n");
-            return;
-        }
-        Bank bank = bankService.getBank(bankName);
-        BankCard bankCard = bank.getIssuedBankCards().get(cardNumber);
-        Account account = bankCard.getAccount();
-        if (account == null) {
-            outputArea.appendText("查無帳戶資料\n");
-            return;
-        }
+        Double amount = parseAmount(amountField.getText());
+        if (amount == null) return;
+        Account account = getAccount();
+        if (account == null) return;
         ATM atm = new ATM(account);
         boolean result = atm.withdraw(amount);
         if (result) {
@@ -157,57 +163,29 @@ public class ATMController {
 
     @FXML
     private void onBalanceClick() {
-        String cardNumber = loginCard;
-        String bankName = loginBank;
-        if (cardNumber == null || bankName == null) {
-            outputArea.appendText("請選擇卡號、銀行\n");
-            return;
-        }
-        Bank bank = bankService.getBank(bankName);
-        BankCard bankCard = bank.getIssuedBankCards().get(cardNumber);
-        Account account = bankCard.getAccount();
-        if (account == null) {
-            outputArea.appendText("查無帳戶資料\n");
-            return;
-        }
+        Account account = getAccount();
+        if (account == null) return;
         ATM atm = new ATM(account);
         outputArea.appendText("帳戶餘額：" + atm.getBalance() + "\n");
     }
 
     @FXML
     protected void onTransferClick() {
-        String fromCardNumber = loginCard;
-        String fromBankName = loginBank;
         String toUserName = toUserCombo.getValue();
         String toBankName = toBankCombo.getValue();
         String toAccountNumber = toAccountCombo.getValue();
-        String amountStr = amountField.getText();
-        if (fromCardNumber == null || fromBankName == null) {
-            outputArea.appendText("請先登入");
-            return;
-        }
-        if (toUserName == null || toBankName == null || toAccountNumber == null || amountStr.isEmpty()) {
-            outputArea.appendText("請選擇目標使用者、銀行、帳戶並輸入金額\n");
-            return;
-        }
-        double amount;
-        try {
-            amount = Double.parseDouble(amountStr);
-        } catch (NumberFormatException e) {
-            outputArea.appendText("金額格式錯誤\n");
-            return;
-        }
-        Bank fromBank = bankService.getBank(fromBankName);
-        BankCard fromBankCard = fromBank.getIssuedBankCards().get(fromCardNumber);
-        Account fromAccount = fromBankCard.getAccount();
-        if (fromAccount == null) {
-            outputArea.appendText("查無來源帳戶資料\n");
+        Double amount = parseAmount(amountField.getText());
+        if (amount == null) return;
+        Account fromAccount = getAccount();
+        if (fromAccount == null) return;
+        if (toUserName == null || toBankName == null || toAccountNumber == null) {
+            outputArea.appendText("請選擇目標使用者、銀行、帳戶\n");
             return;
         }
         User toUser = userService.getUser(toBankName, toUserName);
         Account toAccount = toUser.getAccount(toAccountNumber);
         if (toAccount == null || !toAccount.getAccountNumber().equals(toAccountNumber)) {
-            outputArea.appendText("查無目標帳戶資料\n");
+            outputArea.appendText("查無目標帳戶資料或資料錯誤\n");
             return;
         }
         if (fromAccount.equals(toAccount)) {
