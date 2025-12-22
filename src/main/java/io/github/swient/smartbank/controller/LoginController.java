@@ -43,11 +43,11 @@ public class LoginController {
         if (valid) {
             loginMsg.setText("登入成功");
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/io/github/swient/smartbank/view/main.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/io/github/swient/smartbank/view/netbank.fxml"));
                 Scene scene = new Scene(loader.load());
                 // 傳遞登入資訊給主頁控制器
-                MainController mainController = loader.getController();
-                mainController.setLoginUser(bank, userName);
+                NetBankController netBankController = loader.getController();
+                netBankController.setLoginUser(bank, userName);
                 Stage stage = (Stage) userNameField.getScene().getWindow();
                 stage.setScene(scene);
             } catch (IOException e) {

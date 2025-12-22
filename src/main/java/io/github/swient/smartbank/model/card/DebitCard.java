@@ -1,10 +1,9 @@
 package io.github.swient.smartbank.model.card;
 
-import io.github.swient.smartbank.model.bank.Bank;
 import io.github.swient.smartbank.model.account.Account;
 
 public class DebitCard extends BankCard {
-    public DebitCard(String cardNumber, Bank bank, Account account) {
+    public DebitCard(String cardNumber, Account account) {
         super(cardNumber, account);
     }
 

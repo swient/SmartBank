@@ -11,7 +11,6 @@ import javafx.fxml.FXMLLoader;
 import io.github.swient.smartbank.model.account.User;
 import io.github.swient.smartbank.model.account.Account;
 import io.github.swient.smartbank.model.bank.Bank;
-import io.github.swient.smartbank.model.bank.ATM;
 import io.github.swient.smartbank.model.card.BankCard;
 import io.github.swient.smartbank.service.UserService;
 import io.github.swient.smartbank.service.BankService;
@@ -54,7 +53,7 @@ public class RegisterController {
         }
         User user = userService.getUser(bankName, userName);
         Bank bank = bankService.getBank(bankName);
-        BankCard bankCard = ATM.createAccount(user, bank);
+        BankCard bankCard = bank.openAccount(user);
         Account account = bankCard.getAccount();
         if (account == null) {
             registerMsg.setText("開戶失敗，請聯絡客服");

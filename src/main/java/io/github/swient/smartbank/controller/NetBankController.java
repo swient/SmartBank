@@ -13,7 +13,7 @@ import io.github.swient.smartbank.model.card.BankCard;
 import io.github.swient.smartbank.service.UserService;
 import io.github.swient.smartbank.service.BankService;
 
-public class MainController {
+public class NetBankController {
     private String loginBank = null;
     private String loginUser = null;
     private final ObservableList<String> toUsers = FXCollections.observableArrayList();
@@ -249,7 +249,7 @@ public class MainController {
             outputArea.appendText("查無使用者或銀行資料\n");
             return;
         }
-        BankCard bankCard = ATM.createAccount(user, bank);
+        BankCard bankCard = bank.openAccount(user);
         Account account = bankCard.getAccount();
         updateAccountCombo();
         outputArea.appendText("新增帳戶成功！\n帳戶：" + account.getAccountNumber() + "\n卡號：" + bankCard.getCardNumber() + "\n");
