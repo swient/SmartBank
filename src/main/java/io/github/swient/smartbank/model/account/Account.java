@@ -1,8 +1,12 @@
 package io.github.swient.smartbank.model.account;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Account {
     private final String accountNumber;
     private double balance;
+    private final List<Transaction> transactions = new ArrayList<>();
 
     public Account(String accountNumber) {
         this.accountNumber = accountNumber;
@@ -31,5 +35,9 @@ public class Account {
 
     public double getBalance() {
         return balance;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
     }
 }

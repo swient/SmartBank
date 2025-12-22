@@ -1,5 +1,7 @@
 package io.github.swient.smartbank.controller;
 
+import java.time.format.DateTimeFormatter;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
@@ -8,7 +10,7 @@ import javafx.collections.ObservableList;
 
 import io.github.swient.smartbank.model.account.User;
 import io.github.swient.smartbank.model.account.Account;
-import io.github.swient.smartbank.model.bank.Bank;
+import io.github.swient.smartbank.model.account.Transaction;
 import io.github.swient.smartbank.model.bank.ATM;
 import io.github.swient.smartbank.model.card.BankCard;
 import io.github.swient.smartbank.service.UserService;
@@ -62,6 +64,7 @@ public class NetBankController {
         String bankName = toBankCombo.getValue();
         if (bankName == null) return;
         for (User user : userService.getBankUserMap(bankName).values()) {
+            if ("admin".equals(user.getUserName())) continue;
             toUsers.add(user.getUserName());
         }
     }
@@ -95,11 +98,11 @@ public class NetBankController {
     }
 
     // 由登入頁呼叫，設定登入資訊
-    protected void setLoginUser(String bank, String user) {
-        this.loginBank = bank;
-        this.loginUser = user;
-        if (bankLabel != null) bankLabel.setText(bank);
-        if (userLabel != null) userLabel.setText(user);
+    protected void setLoginUser(String bankName, String userName) {
+        this.loginBank = bankName;
+        this.loginUser = userName;
+        if (bankLabel != null) bankLabel.setText(bankName);
+        if (userLabel != null) userLabel.setText(userName);
         updateAccountCombo();
     }
 
@@ -206,7 +209,7 @@ public class NetBankController {
         ATM fromATM = new ATM(fromAccount);
         boolean result = fromATM.transfer(toAccount, amount);
         if (result) {
-            outputArea.appendText("轉帳成功！來源帳戶餘額：" + fromATM.getBalance() + "，目標帳戶餘額：" + new ATM(toAccount).getBalance() + "\n");
+            outputArea.appendText("轉帳成功！帳戶餘額：" + fromATM.getBalance() + "\n");
         } else {
             outputArea.appendText("轉帳失敗，請確認餘額或資料\n");
         }
@@ -269,5 +272,29 @@ public class NetBankController {
         } catch (Exception e) {
             outputArea.setText("登出失敗");
         }
+    }
+
+    @FXML
+    private void onShowTransactionsClick() {
+        String accountNumber = accountCombo.getValue();
+        Account account = getAccount(accountNumber);
+        if (account == null) return;
+        var transactions = account.getTransactions();
+        if (transactions.isEmpty()) {
+            outputArea.appendText("無交易紀錄\n");
+            return;
+        }
+        outputArea.appendText("--- 交易紀錄 ---\n");
+        for (Transaction tx : transactions) {
+            String formattedDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").format(tx.getDateTime());
+            outputArea.appendText(String.format("%s | %s | 金額: %.2f | 餘額: %.2f | %s\n",
+                formattedDate,
+                tx.getType(),
+                tx.getAmount(),
+                tx.getBalanceAfter(),
+                tx.getRelatedAccount() != null ? ("對方帳號: " + tx.getRelatedAccount()) : ""
+            ));
+        }
+        outputArea.appendText("--- 紀錄結尾 ---\n");
     }
 }

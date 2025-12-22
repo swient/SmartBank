@@ -1,5 +1,7 @@
 package io.github.swient.smartbank.controller;
 
+import java.time.format.DateTimeFormatter;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,6 +11,7 @@ import io.github.swient.smartbank.service.UserService;
 import io.github.swient.smartbank.service.BankService;
 import io.github.swient.smartbank.model.account.User;
 import io.github.swient.smartbank.model.account.Account;
+import io.github.swient.smartbank.model.account.Transaction;
 import io.github.swient.smartbank.model.bank.ATM;
 import io.github.swient.smartbank.model.bank.Bank;
 import io.github.swient.smartbank.model.card.BankCard;
@@ -60,6 +63,7 @@ public class ATMController {
         String bankName = toBankCombo.getValue();
         if (bankName == null) return;
         for (User user : userService.getBankUserMap(bankName).values()) {
+            if ("admin".equals(user.getUserName())) continue;
             toUsers.add(user.getUserName());
         }
     }
@@ -195,7 +199,7 @@ public class ATMController {
         ATM fromATM = new ATM(fromAccount);
         boolean result = fromATM.transfer(toAccount, amount);
         if (result) {
-            outputArea.appendText("轉帳成功！來源帳戶餘額：" + fromATM.getBalance() + "，目標帳戶餘額：" + new ATM(toAccount).getBalance() + "\n");
+            outputArea.appendText("轉帳成功！帳戶餘額：" + fromATM.getBalance() + "\n");
         } else {
             outputArea.appendText("轉帳失敗，請確認餘額或資料\n");
         }
@@ -211,5 +215,28 @@ public class ATMController {
         } catch (Exception e) {
             outputArea.setText("登出失敗");
         }
+    }
+
+    @FXML
+    private void onShowTransactionsClick() {
+        Account account = getAccount();
+        if (account == null) return;
+        var transactions = account.getTransactions();
+        if (transactions.isEmpty()) {
+            outputArea.appendText("無交易紀錄\n");
+            return;
+        }
+        outputArea.appendText("--- 交易紀錄 ---\n");
+        for (Transaction tx : transactions) {
+            String formattedDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").format(tx.getDateTime());
+            outputArea.appendText(String.format("%s | %s | 金額: %.2f | 餘額: %.2f | %s\n",
+                formattedDate,
+                tx.getType(),
+                tx.getAmount(),
+                tx.getBalanceAfter(),
+                tx.getRelatedAccount() != null ? ("對方帳號: " + tx.getRelatedAccount()) : ""
+            ));
+        }
+        outputArea.appendText("--- 紀錄結尾 ---\n");
     }
 }

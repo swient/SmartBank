@@ -33,8 +33,11 @@
         <Button text="存款" onAction="#onDepositClick"/>
         <Button text="提款" onAction="#onWithdrawClick"/>
         <Button text="轉帳" onAction="#onTransferClick"/>
-        <Button text="查詢餘額" onAction="#onBalanceClick"/>
         <Button text="登出" onAction="#onLogoutClick"/>
     </HBox>
-    <TextArea fx:id="outputArea" prefRowCount="8" editable="false"/>
+    <HBox spacing="10">
+        <Button text="查詢交易紀錄" onAction="#onShowTransactionsClick" />
+        <Button text="查詢餘額" onAction="#onBalanceClick"/>
+    </HBox>
+    <TextArea fx:id="outputArea" prefRowCount="12" editable="false"/>
 </VBox>
