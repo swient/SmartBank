@@ -9,6 +9,7 @@ public class Transaction {
 
     private final Type type;
     private final double amount;
+    private final double fee;
     private final LocalDateTime dateTime;
     private final double balanceAfter;
     private final String relatedAccount;
@@ -16,14 +17,17 @@ public class Transaction {
     public Transaction(Type type, double amount, double balanceAfter) {
         this.type = type;
         this.amount = amount;
+        this.fee = 0;
         this.dateTime = LocalDateTime.now();
         this.balanceAfter = balanceAfter;
         this.relatedAccount = null;
     }
 
-    public Transaction(Type type, double amount, double balanceAfter, String relatedAccount) {
+    // 轉帳交易
+    public Transaction(Type type, double amount, double fee, double balanceAfter, String relatedAccount) {
         this.type = type;
         this.amount = amount;
+        this.fee = fee;
         this.dateTime = LocalDateTime.now();
         this.balanceAfter = balanceAfter;
         this.relatedAccount = relatedAccount;
@@ -35,6 +39,10 @@ public class Transaction {
 
     public double getAmount() {
         return amount;
+    }
+
+    public double getFee() {
+        return fee;
     }
 
     public LocalDateTime getDateTime() {

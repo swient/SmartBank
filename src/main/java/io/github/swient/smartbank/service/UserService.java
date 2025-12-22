@@ -68,8 +68,8 @@ public class UserService {
         return bankCard.getPinCode().equals(hashed);
     }
 
-    public Map<String, User> getBankUserMap(String bank) {
-        return bankUserMap.getOrDefault(bank, new HashMap<>());
+    public Map<String, User> getBankUserMap(String bankName) {
+        return bankUserMap.getOrDefault(bankName, new HashMap<>());
     }
 
     private String hashPassword(String password) {

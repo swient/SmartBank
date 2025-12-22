@@ -197,9 +197,9 @@ public class ATMController {
             return;
         }
         ATM fromATM = new ATM(fromAccount);
-        boolean result = fromATM.transfer(toAccount, amount);
+        boolean result = fromATM.transfer(toAccount, amount, loginBank, toBankName);
         if (result) {
-            outputArea.appendText("轉帳成功！帳戶餘額：" + fromATM.getBalance() + "\n");
+            outputArea.appendText("轉帳成功！帳戶餘額：" + fromATM.getBalance() + " (手續費: " + fromATM.getFee() + ")\n");
         } else {
             outputArea.appendText("轉帳失敗，請確認餘額或資料\n");
         }
@@ -229,12 +229,13 @@ public class ATMController {
         outputArea.appendText("--- 交易紀錄 ---\n");
         for (Transaction tx : transactions) {
             String formattedDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS").format(tx.getDateTime());
-            outputArea.appendText(String.format("%s | %s | 金額: %.2f | 餘額: %.2f | %s\n",
+            outputArea.appendText(String.format("%s | %s | 金額: %.2f %s | 餘額: %.2f %s\n",
                 formattedDate,
                 tx.getType(),
                 tx.getAmount(),
+                tx.getFee() > 0 ? ("| 手續費: " + tx.getFee()) : "",
                 tx.getBalanceAfter(),
-                tx.getRelatedAccount() != null ? ("對方帳號: " + tx.getRelatedAccount()) : ""
+                tx.getRelatedAccount() != null ? ("| 目標帳號: " + tx.getRelatedAccount()) : ""
             ));
         }
         outputArea.appendText("--- 紀錄結尾 ---\n");
