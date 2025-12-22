@@ -22,12 +22,12 @@ public class Bank {
         return name;
     }
 
-    public BankCard openAccount(User user) {
+    public BankCard openAccount(User user, String pinCode) {
         String accountNumber = generateAccountNumber();
         Account account = new Account(accountNumber);
         issuedAccounts.put(accountNumber, account);
         user.addAccount(accountNumber, account);
-        BankCard bankCard = new DebitCard(generateCardNumber(), account);
+        BankCard bankCard = new DebitCard(generateCardNumber(), pinCode, account);
         issuedBankCards.put(bankCard.getCardNumber(), bankCard);
         user.addBankCard(bankCard);
         return bankCard;

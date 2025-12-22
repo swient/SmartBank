@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="io.github.swient.smartbank.controller.ATMController">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    <HBox spacing="10">
+        <Label text="銀行:"/>
+        <Label fx:id="bankLabel"/>
+        <Label text="卡號:"/>
+        <Label fx:id="cardLabel"/>
+        <Label text="帳號:"/>
+        <Label fx:id="accountLabel"/>
+    </HBox>
+    <HBox spacing="10">
+        <Label text="金額"/>
+        <TextField fx:id="amountField"/>
+    </HBox>
+    <HBox spacing="10">
+        <Label text="收款銀行"/>
+        <ComboBox fx:id="toBankCombo"/>
+        <Label text="收款人"/>
+        <ComboBox fx:id="toUserCombo"/>
+        <Label text="收款帳戶"/>
+        <ComboBox fx:id="toAccountCombo"/>
+    </HBox>
+    <HBox spacing="10">
+        <Button text="存款" onAction="#onDepositClick"/>
+        <Button text="提款" onAction="#onWithdrawClick"/>
+        <Button text="轉帳" onAction="#onTransferClick"/>
+        <Button text="查詢餘額" onAction="#onBalanceClick"/>
+        <Button text="登出" onAction="#onLogoutClick"/>
+    </HBox>
+    <TextArea fx:id="outputArea" prefRowCount="8" editable="false"/>
+</VBox>

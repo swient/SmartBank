@@ -8,9 +8,6 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 
-import io.github.swient.smartbank.model.account.User;
-import io.github.swient.smartbank.model.account.Account;
-import io.github.swient.smartbank.model.bank.Bank;
 import io.github.swient.smartbank.model.card.BankCard;
 import io.github.swient.smartbank.service.UserService;
 import io.github.swient.smartbank.service.BankService;
@@ -25,6 +22,8 @@ public class RegisterController {
     private TextField userNameField;
     @FXML
     private PasswordField passwordField;
+    @FXML
+    private PasswordField pinCodeField;
     @FXML
     private ComboBox<String> bankCombo;
     @FXML
@@ -41,26 +40,18 @@ public class RegisterController {
         String fullName = fullNameField.getText();
         String userName = userNameField.getText();
         String password = passwordField.getText();
+        String pinCode = pinCodeField.getText();
         String bankName = bankCombo.getValue();
-        if (fullName.isEmpty() || userName.isEmpty() || password.isEmpty() || bankName == null) {
-            registerMsg.setText("請輸入帳號、姓名、密碼並選擇銀行");
+        if (fullName.isEmpty() || userName.isEmpty() || password.isEmpty() || pinCode.isEmpty() || bankName == null) {
+            registerMsg.setText("請輸入帳號、姓名、密碼、PIN 碼並選擇銀行");
             return;
         }
-        boolean success = userService.registerUser(bankName, fullName, userName, password);
-        if (!success) {
+        BankCard bankCard = userService.registerUser(bankName, fullName, userName, password, pinCode);
+        if (bankCard == null) {
             registerMsg.setText("該銀行已存在相同帳號");
             return;
         }
-        User user = userService.getUser(bankName, userName);
-        Bank bank = bankService.getBank(bankName);
-        BankCard bankCard = bank.openAccount(user);
-        Account account = bankCard.getAccount();
-        if (account == null) {
-            registerMsg.setText("開戶失敗，請聯絡客服");
-            registerMsg.setTextFill(javafx.scene.paint.Color.RED);
-            return;
-        }
-        registerMsg.setText("開戶成功！\n帳戶：" + account.getAccountNumber() + "\n卡號：" + bankCard.getCardNumber());
+        registerMsg.setText("開戶成功！\n帳戶：" + bankCard.getAccount().getAccountNumber() + "\n卡號：" + bankCard.getCardNumber());
         registerMsg.setTextFill(javafx.scene.paint.Color.GREEN);
     }
 

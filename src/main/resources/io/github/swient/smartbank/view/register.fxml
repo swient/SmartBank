@@ -6,22 +6,26 @@
 
 <VBox alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="io.github.swient.smartbank.controller.RegisterController"
-      prefWidth="400" prefHeight="320">
+      prefWidth="420" prefHeight="350">
     <padding>
         <Insets top="40" right="40" bottom="40" left="40"/>
     </padding>
     <Label text="SmartBank 開戶"/>
     <HBox spacing="10" alignment="CENTER">
-        <Label text="姓名"/>
+        <Label text="姓名" prefWidth="40"/>
         <TextField fx:id="fullNameField"/>
     </HBox>
     <HBox spacing="10" alignment="CENTER">
-        <Label text="帳號"/>
+        <Label text="帳號" prefWidth="40"/>
         <TextField fx:id="userNameField"/>
     </HBox>
     <HBox spacing="10" alignment="CENTER">
-        <Label text="密碼"/>
+        <Label text="密碼" prefWidth="40"/>
         <PasswordField fx:id="passwordField"/>
+    </HBox>
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="PIN 碼" prefWidth="40"/>
+        <PasswordField fx:id="pinCodeField"/>
     </HBox>
     <HBox spacing="10" alignment="CENTER">
         <Label text="選擇銀行"/>

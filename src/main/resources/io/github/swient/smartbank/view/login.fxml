@@ -6,25 +6,29 @@
 
 <VBox alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="io.github.swient.smartbank.controller.LoginController"
-      prefWidth="400" prefHeight="320">
+      prefWidth="420" prefHeight="350">
     <padding>
         <Insets top="40" right="40" bottom="40" left="40"/>
     </padding>
     <Label text="SmartBank 登入"/>
     <HBox spacing="10" alignment="CENTER">
-        <Label text="帳號"/>
+        <Label fx:id="userLabel" text="帳號" prefWidth="40"/>
         <TextField fx:id="userNameField"/>
     </HBox>
     <HBox spacing="10" alignment="CENTER">
-        <Label text="密碼"/>
+        <Label fx:id="passwordLabel" text="密碼" prefWidth="40"/>
         <PasswordField fx:id="passwordField"/>
+    </HBox>
+    <HBox spacing="10" alignment="CENTER">
+        <Label text="選擇模式"/>
+        <ComboBox fx:id="modeCombo"/>
     </HBox>
     <HBox spacing="10" alignment="CENTER">
         <Label text="選擇銀行"/>
         <ComboBox fx:id="bankCombo"/>
     </HBox>
     <HBox spacing="10" alignment="CENTER">
-        <Button text="確認登入" onAction="#onLoginClick"/>
+        <Button fx:id="loginButton" text="確認登入" onAction="#onNetBankLoginClick"/>
         <Button text="前往開戶" onAction="#onRegisterClick"/>
     </HBox>
     <Label fx:id="loginMsg" textFill="red"/>

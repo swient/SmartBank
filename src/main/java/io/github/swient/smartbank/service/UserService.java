@@ -7,9 +7,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import io.github.swient.smartbank.model.account.User;
+import io.github.swient.smartbank.model.bank.Bank;
+import io.github.swient.smartbank.model.card.BankCard;
 
 public class UserService {
     private static final UserService instance = new UserService();
+    private static final BankService bankService = BankService.getInstance();
 
     public static UserService getInstance() {
         return instance;
@@ -17,12 +20,20 @@ public class UserService {
 
     private final Map<String, Map<String, User>> bankUserMap = new HashMap<>();
 
-    public boolean registerUser(String bankName, String fullName, String userName, String password) {
+    public BankCard registerUser(String bankName, String fullName, String userName, String password, String pinCode) {
         Map<String, User> userMap = bankUserMap.computeIfAbsent(bankName, _ -> new HashMap<>());
-        if (userMap.containsKey(userName)) return false;
+        if (userMap.containsKey(userName)) return null;
         User user = new User(fullName, userName, hashPassword(password));
         userMap.put(userName, user);
-        return true;
+        Bank bank = bankService.getBank(bankName);
+        return bank.openAccount(user, hashPassword(pinCode));
+    }
+
+    public BankCard registerAccount(String bankName, String userName, String pinCode) {
+        User user = getUser(bankName, userName);
+        Bank bank = bankService.getBank(bankName);
+        if (user == null || bank == null) return null;
+        return bank.openAccount(user, hashPassword(pinCode));
     }
 
     public User getUser(String bankName, String userName) {
@@ -31,13 +42,21 @@ public class UserService {
         return userMap.get(userName);
     }
 
-    public boolean validateLogin(String bankName, String userName, String password) {
+    public boolean validateNetBankLogin(String bankName, String userName, String password) {
         Map<String, User> userMap = bankUserMap.get(bankName);
         if (userMap == null) return false;
         User user = userMap.get(userName);
         if (user == null) return false;
         String hashed = hashPassword(password);
         return user.getPassword().equals(hashed);
+    }
+
+    public boolean validateATMLogin(String bankName, String cardNumber, String pinCode) {
+        Bank bank = bankService.getBank(bankName);
+        BankCard bankCard = bank.getIssuedBankCards().get(cardNumber);
+        if (bankCard == null) return false;
+        String hashed = hashPassword(pinCode);
+        return bankCard.getPinCode().equals(hashed);
     }
 
     public Map<String, User> getBankUserMap(String bank) {
