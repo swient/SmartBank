@@ -9,18 +9,13 @@ public class User {
     private final String fullName;
     private final String userName;
     private final String password;
-    private Account account;
+    private final Map<String, Account> accounts = new HashMap<>();
     private final Map<String, BankCard> bankCards = new HashMap<>();
 
     public User(String fullName, String userName, String password) {
         this.fullName = fullName;
         this.userName = userName;
         this.password = password;
-        this.account = null;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
     }
 
     public String getFullName() {
@@ -35,8 +30,16 @@ public class User {
         return password;
     }
 
-    public Account getAccount() {
-        return account;
+    public void addAccount(String accountNumber, Account account) {
+        this.accounts.put(accountNumber, account);
+    }
+
+    public Account getAccount(String accountNumber) {
+        return accounts.get(accountNumber);
+    }
+
+    public Map<String, Account> getAccounts() {
+        return accounts;
     }
 
     public void addBankCard(BankCard bankCard) {

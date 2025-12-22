@@ -19,10 +19,6 @@ public class BankService {
         bankMap.put("B銀行", new Bank("B銀行"));
     }
 
-    public Bank getOrCreateBank(String bankName) {
-        return bankMap.computeIfAbsent(bankName, Bank::new);
-    }
-
     public Bank getBank(String bankName) {
         return bankMap.get(bankName);
     }

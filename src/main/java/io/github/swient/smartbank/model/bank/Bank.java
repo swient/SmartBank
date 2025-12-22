@@ -26,7 +26,7 @@ public class Bank {
         String accountNumber = generateAccountNumber();
         Account account = new Account(accountNumber);
         issuedAccounts.put(accountNumber, account);
-        user.setAccount(account);
+        user.addAccount(accountNumber, account);
         BankCard bankCard = new DebitCard(generateCardNumber(), this, account);
         issuedBankCards.put(bankCard.getCardNumber(), bankCard);
         user.addBankCard(bankCard);

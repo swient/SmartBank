@@ -9,6 +9,7 @@ import io.github.swient.smartbank.model.account.User;
 import io.github.swient.smartbank.model.account.Account;
 import io.github.swient.smartbank.model.bank.Bank;
 import io.github.swient.smartbank.model.bank.ATM;
+import io.github.swient.smartbank.model.card.BankCard;
 import io.github.swient.smartbank.service.UserService;
 import io.github.swient.smartbank.service.BankService;
 
@@ -70,8 +71,10 @@ public class MainController {
         accountCombo.getItems().clear();
         if (userName != null && bankName != null) {
             User user = userService.getUser(bankName, userName);
-            if (user != null && user.getAccount() != null) {
-                accountCombo.getItems().add(user.getAccount().getAccountNumber());
+            if (user != null) {
+                for (Account account : user.getAccounts().values()) {
+                    accountCombo.getItems().add(account.getAccountNumber());
+                }
             }
         }
     }
@@ -82,8 +85,10 @@ public class MainController {
         toAccountCombo.getItems().clear();
         if (toUserName != null && toBankName != null) {
             User toUser = userService.getUser(toBankName, toUserName);
-            if (toUser != null && toUser.getAccount() != null) {
-                toAccountCombo.getItems().add(toUser.getAccount().getAccountNumber());
+            if (toUser != null) {
+                for (Account account : toUser.getAccounts().values()) {
+                    toAccountCombo.getItems().add(account.getAccountNumber());
+                }
             }
         }
     }
@@ -115,16 +120,15 @@ public class MainController {
             return;
         }
         User user = userService.getUser(bankName, userName);
-        Bank bank = bankService.getOrCreateBank(bankName);
-        Account account = user.getAccount();
-        if (bank == null || account == null || !account.getAccountNumber().equals(accountNumber)) {
-            outputArea.appendText("資料錯誤\n");
+        Account account = user.getAccount(accountNumber);
+        if (account == null || !account.getAccountNumber().equals(accountNumber)) {
+            outputArea.appendText("查無帳戶資料\n");
             return;
         }
         ATM atm = new ATM(account);
         boolean result = atm.deposit(amount);
         if (result) {
-            outputArea.appendText("存款成功！帳戶餘額：" + account.getBalance() + "\n");
+            outputArea.appendText("存款成功！帳戶餘額：" + atm.getBalance() + "\n");
         } else {
             outputArea.appendText("存款失敗，請確認資料\n");
         }
@@ -148,16 +152,15 @@ public class MainController {
             return;
         }
         User user = userService.getUser(bankName, userName);
-        Bank bank = bankService.getOrCreateBank(bankName);
-        Account account = user.getAccount();
-        if (bank == null || account == null || !account.getAccountNumber().equals(accountNumber)) {
-            outputArea.appendText("資料錯誤\n");
+        Account account = user.getAccount(accountNumber);
+        if (account == null || !account.getAccountNumber().equals(accountNumber)) {
+            outputArea.appendText("查無帳戶資料\n");
             return;
         }
         ATM atm = new ATM(account);
         boolean result = atm.withdraw(amount);
         if (result) {
-            outputArea.appendText("提款成功！帳戶餘額：" + account.getBalance() + "\n");
+            outputArea.appendText("提款成功！帳戶餘額：" + atm.getBalance() + "\n");
         } else {
             outputArea.appendText("提款失敗，請確認餘額或資料\n");
         }
@@ -173,12 +176,13 @@ public class MainController {
             return;
         }
         User user = userService.getUser(bankName, userName);
-        if (user == null || user.getAccount() == null || !user.getAccount().getAccountNumber().equals(accountNumber)) {
+        Account account = user.getAccount(accountNumber);
+        if (account == null || !account.getAccountNumber().equals(accountNumber)) {
             outputArea.appendText("查無帳戶資料\n");
             return;
         }
-        Account account = user.getAccount();
-        outputArea.appendText("帳戶餘額：" + account.getBalance() + "\n");
+        ATM atm = new ATM(account);
+        outputArea.appendText("帳戶餘額：" + atm.getBalance() + "\n");
     }
 
     @FXML
@@ -207,14 +211,14 @@ public class MainController {
             return;
         }
         User fromUser = userService.getUser(fromBankName, fromUserName);
-        Bank fromBank = bankService.getOrCreateBank(fromBankName);
-        Account fromAccount = fromUser.getAccount();
+        Bank fromBank = bankService.getBank(fromBankName);
+        Account fromAccount = fromUser.getAccount(fromAccountNumber);
         if (fromAccount == null || !fromAccount.getAccountNumber().equals(fromAccountNumber)) {
             fromAccount = null;
         }
         User toUser = userService.getUser(toBankName, toUserName);
-        Bank toBank = bankService.getOrCreateBank(toBankName);
-        Account toAccount = toUser.getAccount();
+        Bank toBank = bankService.getBank(toBankName);
+        Account toAccount = toUser.getAccount(toAccountNumber);
         if (toAccount == null || !toAccount.getAccountNumber().equals(toAccountNumber)) {
             toAccount = null;
         }
@@ -225,10 +229,30 @@ public class MainController {
         ATM fromATM = new ATM(fromAccount);
         boolean result = fromATM.transfer(toAccount, amount);
         if (result) {
-            outputArea.appendText("轉帳成功！來源帳戶餘額：" + fromAccount.getBalance() + "，目標帳戶餘額：" + toAccount.getBalance() + "\n");
+            outputArea.appendText("轉帳成功！來源帳戶餘額：" + fromATM.getBalance() + "，目標帳戶餘額：" + new ATM(toAccount).getBalance() + "\n");
         } else {
             outputArea.appendText("轉帳失敗，請確認餘額或資料\n");
         }
+    }
+
+    @FXML
+    private void onAddAccountClick() {
+        String userName = loginUser;
+        String bankName = loginBank;
+        if (userName == null || bankName == null) {
+            outputArea.appendText("請先登入\n");
+            return;
+        }
+        User user = userService.getUser(bankName, userName);
+        Bank bank = bankService.getBank(bankName);
+        if (user == null || bank == null) {
+            outputArea.appendText("查無使用者或銀行資料\n");
+            return;
+        }
+        BankCard bankCard = ATM.createAccount(user, bank);
+        Account account = bankCard.getAccount();
+        updateAccountCombo();
+        outputArea.appendText("新增帳戶成功！\n帳戶：" + account.getAccountNumber() + "\n卡號：" + bankCard.getCardNumber() + "\n");
     }
 
     @FXML

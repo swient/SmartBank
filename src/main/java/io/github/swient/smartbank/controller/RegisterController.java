@@ -9,10 +9,11 @@ import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 
 import io.github.swient.smartbank.model.account.User;
+import io.github.swient.smartbank.model.account.Account;
 import io.github.swient.smartbank.model.bank.Bank;
+import io.github.swient.smartbank.model.bank.ATM;
 import io.github.swient.smartbank.model.card.BankCard;
 import io.github.swient.smartbank.service.UserService;
-import io.github.swient.smartbank.model.account.Account;
 import io.github.swient.smartbank.service.BankService;
 
 public class RegisterController {
@@ -46,14 +47,14 @@ public class RegisterController {
             registerMsg.setText("請輸入帳號、姓名、密碼並選擇銀行");
             return;
         }
-        Bank bank = bankService.getBank(bankName);
         boolean success = userService.registerUser(bankName, fullName, userName, password);
         if (!success) {
             registerMsg.setText("該銀行已存在相同帳號");
             return;
         }
         User user = userService.getUser(bankName, userName);
-        BankCard bankCard = bank.openAccount(user);
+        Bank bank = bankService.getBank(bankName);
+        BankCard bankCard = ATM.createAccount(user, bank);
         Account account = bankCard.getAccount();
         if (account == null) {
             registerMsg.setText("開戶失敗，請聯絡客服");
