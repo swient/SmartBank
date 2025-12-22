@@ -13,6 +13,15 @@ import io.github.swient.smartbank.model.card.BankCard;
 public class UserService {
     private static final UserService instance = new UserService();
     private static final BankService bankService = BankService.getInstance();
+    // 每個銀行自動註冊管理員帳號
+    static {
+        for (String bankName : bankService.getBankMap().keySet()) {
+            Map<String, User> userMap = instance.bankUserMap.computeIfAbsent(bankName, _ -> new HashMap<>());
+            if (!userMap.containsKey("admin")) {
+                userMap.put("admin", new User("管理員", "admin", instance.hashPassword("admin")));
+            }
+        }
+    }
 
     public static UserService getInstance() {
         return instance;

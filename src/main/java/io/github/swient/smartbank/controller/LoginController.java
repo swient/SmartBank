@@ -66,13 +66,28 @@ public class LoginController {
             loginMsg.setText("請輸入帳號、密碼並選擇銀行");
             return;
         }
+        // 管理員帳號判斷
         boolean valid = userService.validateNetBankLogin(bankName, userName, password);
+        if ("admin".equals(userName) && valid) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/io/github/swient/smartbank/view/admin.fxml"));
+                Scene scene = new Scene(loader.load());
+                // 傳遞登入資訊給管理員頁控制器
+                AdminController adminController = loader.getController();
+                adminController.setLoginUser(bankName);
+                Stage stage = (Stage) userNameField.getScene().getWindow();
+                stage.setScene(scene);
+            } catch (IOException e) {
+                loginMsg.setText("管理頁面載入失敗");
+            }
+            return;
+        }
         if (valid) {
             loginMsg.setText("登入成功");
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/io/github/swient/smartbank/view/netbank.fxml"));
                 Scene scene = new Scene(loader.load());
-                // 傳遞登入資訊給主頁控制器
+                // 傳遞登入資訊給網路銀行頁控制器
                 NetBankController netBankController = loader.getController();
                 netBankController.setLoginUser(bankName, userName);
                 Stage stage = (Stage) userNameField.getScene().getWindow();
@@ -99,7 +114,7 @@ public class LoginController {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/io/github/swient/smartbank/view/atm.fxml"));
                 Scene scene = new Scene(loader.load());
-                // 傳遞登入資訊給主頁控制器
+                // 傳遞登入資訊給 ATM 頁控制器
                 ATMController atmController = loader.getController();
                 atmController.setLoginUser(bankName, cardNumber);
                 Stage stage = (Stage) userNameField.getScene().getWindow();

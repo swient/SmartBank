@@ -46,6 +46,10 @@ public class RegisterController {
             registerMsg.setText("請輸入帳號、姓名、密碼、PIN 碼並選擇銀行");
             return;
         }
+        if (!pinCode.matches("\\d{6}")) {
+            registerMsg.setText("PIN 碼必須為 6 位數字");
+            return;
+        }
         BankCard bankCard = userService.registerUser(bankName, fullName, userName, password, pinCode);
         if (bankCard == null) {
             registerMsg.setText("該銀行已存在相同帳號");

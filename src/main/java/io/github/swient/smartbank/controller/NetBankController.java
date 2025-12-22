@@ -276,6 +276,10 @@ public class NetBankController {
             outputArea.appendText("未輸入 PIN 碼，取消新增帳戶\n");
             return;
         }
+        if (!pinCode.matches("\\d{6}")) {
+            outputArea.appendText("PIN 碼必須為 6 位數字\n");
+            return;
+        }
 
         BankCard bankCard = userService.registerAccount(bankName, userName, pinCode);
         Account account = bankCard.getAccount();
