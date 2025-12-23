@@ -1,6 +1,5 @@
 package io.github.swient.smartbank.service;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -16,45 +15,42 @@ public class UserService {
     // 每個銀行自動註冊管理員帳號
     static {
         for (String bankName : bankService.getBankMap().keySet()) {
-            Map<String, User> userMap = instance.bankUserMap.computeIfAbsent(bankName, _ -> new HashMap<>());
-            if (!userMap.containsKey("admin")) {
-                userMap.put("admin", new User("管理員", "admin", instance.hashPassword("admin")));
+            Bank bank = bankService.getBank(bankName);
+            if (!bank.hasUser("admin")) {
+                bank.addUser("admin", new User("管理員", "admin", instance.hashPassword("admin")));
             }
         }
     }
 
-    public static UserService getInstance() {
-        return instance;
-    }
+    public static UserService getInstance() { return instance; }
 
-    private final Map<String, Map<String, User>> bankUserMap = new HashMap<>();
 
     public BankCard registerUser(String bankName, String fullName, String userName, String password, String pinCode) {
-        Map<String, User> userMap = bankUserMap.computeIfAbsent(bankName, _ -> new HashMap<>());
-        if (userMap.containsKey(userName)) return null;
-        User user = new User(fullName, userName, hashPassword(password));
-        userMap.put(userName, user);
         Bank bank = bankService.getBank(bankName);
+        if (bank == null || bank.hasUser(userName)) return null;
+        User user = new User(fullName, userName, hashPassword(password));
+        bank.addUser(userName, user);
         return bank.openAccount(user, hashPassword(pinCode));
     }
 
     public BankCard registerAccount(String bankName, String userName, String pinCode) {
-        User user = getUser(bankName, userName);
         Bank bank = bankService.getBank(bankName);
-        if (user == null || bank == null) return null;
+        if (bank == null) return null;
+        User user = bank.getUser(userName);
+        if (user == null) return null;
         return bank.openAccount(user, hashPassword(pinCode));
     }
 
     public User getUser(String bankName, String userName) {
-        Map<String, User> userMap = bankUserMap.get(bankName);
-        if (userMap == null) return null;
-        return userMap.get(userName);
+        Bank bank = bankService.getBank(bankName);
+        if (bank == null) return null;
+        return bank.getUser(userName);
     }
 
     public boolean validateNetBankLogin(String bankName, String userName, String password) {
-        Map<String, User> userMap = bankUserMap.get(bankName);
-        if (userMap == null) return false;
-        User user = userMap.get(userName);
+        Bank bank = bankService.getBank(bankName);
+        if (bank == null) return false;
+        User user = bank.getUser(userName);
         if (user == null) return false;
         String hashed = hashPassword(password);
         return user.getPassword().equals(hashed);
@@ -69,7 +65,9 @@ public class UserService {
     }
 
     public Map<String, User> getBankUserMap(String bankName) {
-        return bankUserMap.getOrDefault(bankName, new HashMap<>());
+        Bank bank = bankService.getBank(bankName);
+        if (bank == null) return null;
+        return bank.getIssuedUsers();
     }
 
     private String hashPassword(String password) {

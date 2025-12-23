@@ -13,6 +13,7 @@ public class Bank {
     private final String name;
     private final Map<String, Account> issuedAccounts = new HashMap<>();
     private final Map<String, BankCard> issuedBankCards = new HashMap<>();
+    private final Map<String, User> issuedUsers = new HashMap<>();
 
     public Bank(String name) {
         this.name = name;
@@ -39,6 +40,22 @@ public class Bank {
 
     public Map<String, BankCard> getIssuedBankCards() {
         return issuedBankCards;
+    }
+
+    public Map<String, User> getIssuedUsers() {
+        return issuedUsers;
+    }
+
+    public boolean hasUser(String userName) {
+        return issuedUsers.containsKey(userName);
+    }
+
+    public void addUser(String userName, User user) {
+        issuedUsers.put(userName, user);
+    }
+
+    public User getUser(String userName) {
+        return issuedUsers.get(userName);
     }
 
     // 產生14碼純數字帳戶
